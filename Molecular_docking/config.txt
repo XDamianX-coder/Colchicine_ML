@@ -1,0 +1,14 @@
+receptor = 1SA0_AB_chains_prot_polar_H.pdbqt
+ligand = 1SA0_AB_chains_colchicine_only.pdbqt
+
+center_x = 119.743
+center_y = 92.779
+center_z = 10.765
+
+size_x = 44
+size_y = 44
+size_z = 60
+
+out = blind_try_lig_1_pub_1.pdbqt
+
+exhaustiveness = 32
