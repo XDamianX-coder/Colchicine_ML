@@ -14,7 +14,8 @@ from sklearn import linear_model
 
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, mean_squared_error
+import math
 
 def prepare_data(file):
       
@@ -180,12 +181,18 @@ def prepare_model(data, features, model_type, test_data, target_column_name, ran
             print('Correlation coefficient: '+ str(sqrt_r2))
             print("Test data - unseen during training:")
             pred = model.predict(X_test)
-            print("R^2 score: "+ str(r2_score(pred, y_test)))
-            sqrt_r2 = np.sqrt(r2_score(pred, y_test))
+            print("R^2 score: "+ str(r2_score(y_test, pred)))
+            sqrt_r2 = np.sqrt(r2_score(y_test, pred))
             print('Correlation coefficient: '+ str(sqrt_r2))
             print(pred)
             print(y_test) 
-            test_data_r2 = r2_score(pred, y_test)
+            test_data_r2 = r2_score(y_test, pred)
+            pred = model.predict(X_train)
+            training_data_RMSE = math.sqrt(mean_squared_error(y_train, pred))
+            print('Training Root Mean Square Error: '+str(training_data_RMSE))
+            pred = model.predict(X_test)
+            test_data_RMSE = math.sqrt(mean_squared_error(y_test, pred))
+            print('Testing Root Mean Square Error: '+str(test_data_RMSE))
 
         else:
             X = data[features['molecular descriptor name']]
@@ -204,12 +211,18 @@ def prepare_model(data, features, model_type, test_data, target_column_name, ran
             print('Correlation coefficient: '+ str(sqrt_r2))
             print("Test data - unseen during training:")
             pred = model.predict(test_data[features['molecular descriptor name']])
-            print("R^2 score: "+ str(r2_score(pred, test_data[target_column_name])))
-            sqrt_r2 = np.sqrt(r2_score(pred, test_data[target_column_name]))
+            print("R^2 score: "+ str(r2_score(test_data[target_column_name], pred)))
+            sqrt_r2 = np.sqrt(r2_score(test_data[target_column_name], pred))
             print('Correlation coefficient: '+ str(sqrt_r2))
             print(pred)
             print(test_data[target_column_name]) 
-            test_data_r2 = r2_score(pred, test_data[target_column_name])
+            test_data_r2 = r2_score(test_data[target_column_name], pred)
+            pred = model.predict(X_train)
+            training_data_RMSE = math.sqrt(mean_squared_error(test_data[target_column_name], pred))
+            print('Training Root Mean Square Error: '+str(training_data_RMSE))
+            pred = model.predict(X_test)
+            test_data_RMSE = math.sqrt(mean_squared_error(test_data[target_column_name], pred))
+            print('Testing Root Mean Square Error: '+str(test_data_RMSE))
 
     else:
         if train_test_split_:
@@ -226,6 +239,14 @@ def prepare_model(data, features, model_type, test_data, target_column_name, ran
             sqrt_r2 = np.sqrt(r2_score(pred, y_test))
             
             test_data_r2 = r2_score(pred, y_test)
+
+            pred = model.predict(X_train)
+            training_data_RMSE = math.sqrt(mean_squared_error(y_train, pred))
+        
+            pred = model.predict(X_test)
+            test_data_RMSE = math.sqrt(mean_squared_error(y_test, pred))
+        
+
         else:
             X = data[features['molecular descriptor name']]
 
@@ -239,11 +260,17 @@ def prepare_model(data, features, model_type, test_data, target_column_name, ran
             sqrt_r2 = np.sqrt(r2_score(y, pred))
             training_data_r2 = r2_score(y, pred)
             pred = model.predict(test_data[features['molecular descriptor name']])
-            sqrt_r2 = np.sqrt(r2_score(pred, test_data[target_column_name]))
-            test_data_r2 = r2_score(pred, test_data[target_column_name])
+            sqrt_r2 = np.sqrt(r2_score(test_data[target_column_name], pred))
+            test_data_r2 = r2_score(test_data[target_column_name], pred)
+            pred = model.predict(X_train)
+            training_data_RMSE = math.sqrt(mean_squared_error(test_data[target_column_name], pred))
+        
+            pred = model.predict(X_test)
+            test_data_RMSE = math.sqrt(mean_squared_error(test_data[target_column_name], pred))
+        
     
 
-    return model, training_data_r2, test_data_r2
+    return model, training_data_r2, test_data_r2, training_data_RMSE, test_data_RMSE
     
 
 def data_standardization(dataframe, target_column_name):
@@ -273,7 +300,7 @@ def prepare_data_and_create_model(molecular_descriptors_df, correlation_threshol
         
         if train_test_split_:
             test_data_ = 'None'
-            model, train_r2, test_r2 = prepare_model(data_to_be_prepared, corr, model_type, test_data_, target_column_name, random_state, n_estimators_, max_depth, kernel_, gamma_, train_test_split_, verbose)
+            model, train_r2, test_r2, training_data_RMSE, test_data_RMSE = prepare_model(data_to_be_prepared, corr, model_type, test_data_, target_column_name, random_state, n_estimators_, max_depth, kernel_, gamma_, train_test_split_, verbose)
         else:
             print("There is no hardcoded validation data...")
         
@@ -290,10 +317,10 @@ def prepare_data_and_create_model(molecular_descriptors_df, correlation_threshol
         
         if train_test_split_:
             test_data_ = 'None'
-            model, train_r2, test_r2 = prepare_model(data_to_be_prepared, corr, model_type, test_data_, target_column_name, random_state, n_estimators_, max_depth, kernel_, gamma_, train_test_split_, verbose)
+            model, train_r2, test_r2, training_data_RMSE, test_data_RMSE = prepare_model(data_to_be_prepared, corr, model_type, test_data_, target_column_name, random_state, n_estimators_, max_depth, kernel_, gamma_, train_test_split_, verbose)
         else:
             print("There is no hardcoded validation data...")
     else:
         print("Error...")
     
-    return model, train_r2, test_r2, data_to_be_prepared, corr, target_column_name
+    return model, train_r2, test_r2, data_to_be_prepared, corr, target_column_name, training_data_RMSE, test_data_RMSE
