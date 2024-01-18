@@ -236,9 +236,9 @@ def prepare_model(data, features, model_type, test_data, target_column_name, ran
             sqrt_r2 = np.sqrt(r2_score(y_train, pred))
             training_data_r2 = r2_score(y_train, pred)
             pred = model.predict(X_test)
-            sqrt_r2 = np.sqrt(r2_score(pred, y_test))
+            sqrt_r2 = np.sqrt(r2_score(y_test, pred))
             
-            test_data_r2 = r2_score(pred, y_test)
+            test_data_r2 = r2_score(y_test, pred)
 
             pred = model.predict(X_train)
             training_data_RMSE = math.sqrt(mean_squared_error(y_train, pred))
